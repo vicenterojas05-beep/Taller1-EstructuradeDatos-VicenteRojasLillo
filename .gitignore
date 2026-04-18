@@ -1,0 +1,27 @@
+# Prerrequisitos
+*.d
+
+# Archivos compilados y objetos 
+*.o
+*.obj
+*.out
+*.exe
+*.dll
+*.so
+*.dylibS
+
+# Carpetas de IDEs y editores de código
+.vscode/
+.idea/
+*.suo
+*.sln
+*.sw?
+
+# Archivos del sistema operativo (Windows y macOS)
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
