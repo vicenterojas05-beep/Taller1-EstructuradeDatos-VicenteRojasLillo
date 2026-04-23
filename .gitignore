@@ -25,3 +25,5 @@
 .Trashes
 ehthumbs.db
 Thumbs.db
+# Archivos temporales de Code Runner
+tempcoderunnerfile.cpp

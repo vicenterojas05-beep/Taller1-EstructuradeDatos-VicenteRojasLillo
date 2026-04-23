@@ -1,7 +1,7 @@
 #include "NodoDoble.h"
 
 // constructor
-NodoDoble::NodoDoble(Cancion* c) {
+NodoDoble::NodoDoble(Cancion c) {
     cancion = c;
     siguiente = nullptr;
     anterior = nullptr;
@@ -9,7 +9,7 @@ NodoDoble::NodoDoble(Cancion* c) {
 }
 
 // getters
-Cancion* NodoDoble::getCancion() { 
+Cancion& NodoDoble::getCancion() { 
     return cancion; }
 NodoDoble* NodoDoble::getSiguiente() {
      return siguiente; }
@@ -17,6 +17,9 @@ NodoDoble* NodoDoble::getAnterior() {
     return anterior; }
 
 // setters
+void NodoDoble::setCancion(Cancion song){
+    cancion = song;
+}
 void NodoDoble::setSiguiente(NodoDoble* nodo) {
      siguiente = nodo; }
 void NodoDoble::setAnterior(NodoDoble* nodo) { 
