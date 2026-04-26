@@ -2,6 +2,8 @@
 using namespace std;
 #include <string>
 #include "data_structures/Listadoble.h"
+#include <fstream>
+#include <sstream>
 
 
 
@@ -21,6 +23,52 @@ void Mostrarmenuprincipal(string estado, string cancion, string artista, string 
     cout << "L - Listado de canciones\n";
     cout << "X - Salir\n";
     cout << "Ingrese Opcion: ";
+}
+
+void Cargardatos(ListaDoble& lista) {
+    //abrimos el archivo
+    ifstream archivo("music_source.txt");
+    
+    // por si el archivo esta mal escrito o no existe
+    if (!archivo.is_open()) {
+        cout << ">> Advertencia: No se encontro music_source.txt. Iniciando con lista vacia.\n";
+        return;
+    }
+
+    string linea;
+    
+    //mientras haya lineas por leer  las vamos guardando en "linea"
+    while (getline(archivo, linea)) {
+        stringstream ss(linea); //convertimos la linea para poder cortarla
+        string id_str, nombre, artista, album, year_str, duracion_str, ubicacion;
+
+        //extraemos cada pedazo cortando cuando encontremos una coma ','
+        getline(ss, id_str, ',');
+        getline(ss, nombre, ',');
+        getline(ss, artista, ',');
+        getline(ss, album, ',');
+        getline(ss, year_str, ',');
+        getline(ss, duracion_str, ',');
+        getline(ss, ubicacion, ',');
+
+        
+        int id, year, duracion;
+        //convertimos el texto a numero usando stringstream
+        stringstream conv_id(id_str);
+        conv_id >> id;
+        
+        stringstream conv_year(year_str);
+        conv_year >> year;
+        
+        stringstream conv_dur(duracion_str);
+        conv_dur >> duracion;
+
+        //armamos la cancion con los datos y la metemos a la lista 
+        Cancion nueva_cancion(id, nombre, artista, album, year, duracion, ubicacion);
+        lista.agregarAlFinal(nueva_cancion);
+    }
+    
+    archivo.close(); //cerramos el archivo al terminar
 }
 
 
@@ -43,19 +91,11 @@ int main() {
 
     ListaDoble miLista;
 
-    // --- INICIO DE DATOS DE PRUEBA (Borrar cuando hagamos el Lector de Archivos) ---
-    Cancion c1(1, "Bohemian Rhapsody", "Queen", "A Night at the Opera", 1975, 354, "ruta1");
-    Cancion c2(2, "Tren al Sur", "Los Prisioneros", "Corazones", 1990, 334, "ruta2");
-    Cancion c3(3, "Shape of You", "Ed Sheeran", "Divide", 2017, 233, "ruta3");
-    Cancion c4(4, "Blinding Lights", "The Weeknd", "After Hours", 2020, 200, "ruta4");
-    Cancion c5(5, "Mira Niñita", "Los Jaivas", "Todos Juntos", 1972, 412, "ruta5");
+    Cargardatos(miLista);
 
-    miLista.agregarAlFinal(c1);
-    miLista.agregarAlFinal(c2);
-    miLista.agregarAlFinal(c3);
-    miLista.agregarAlFinal(c4);
-    miLista.agregarAlFinal(c5);
+   
 
+   
     //esto es para que cuando el programa inicie no muestre el menu con datos como "ninguna" o "N/A"
     if (miLista.tieneActual()) {
         Cancion* c = miLista.obtenerActual();
