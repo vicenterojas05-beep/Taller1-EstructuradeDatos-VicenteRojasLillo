@@ -26,6 +26,7 @@ public:
 
     void Mostrarcoladesdeactual();
     void Saltarpistas(int cantidad);
+    void Mostrarlistadocompleto();
 };
 
 #endif

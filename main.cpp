@@ -7,6 +7,7 @@ using namespace std;
 
 
 
+
 void Mostrarmenuprincipal(string estado, string cancion, string artista, string album, int year, string modoaleatorio, string modorepeticion) {
     cout << "========================================================\n";
     cout << estado << " (" << modoaleatorio << "-" << modorepeticion << "): " << cancion << "\n";
@@ -24,6 +25,7 @@ void Mostrarmenuprincipal(string estado, string cancion, string artista, string 
     cout << "X - Salir\n";
     cout << "Ingrese Opcion: ";
 }
+
 
 void Cargardatos(ListaDoble& lista) {
     //abrimos el archivo
@@ -75,6 +77,10 @@ void Cargardatos(ListaDoble& lista) {
 
 
 
+
+
+
+
 int main() {
     //variables de estado
    
@@ -104,10 +110,7 @@ int main() {
         album_actual = c->album;
         year_actual = c->year;
     }
-    // --- FIN DE DATOS DE PRUEBA ---
-
-    //aqui iria la carga de datos (music_source.txt y status.cfg)
-    //cargarDatos(); o algo asi
+   
 
     //el ciclo principal del programa
     while (ejecutando) {
@@ -254,8 +257,15 @@ int main() {
             }
         }
         else if (opcion == "L") {
-             cout << ">> Abriendo Submenu: Todas las canciones\n";
-             // abrirSubmenuListadoCompleto();
+             // limpiamos la pantalla para que se vea la lista
+            #ifdef _WIN32
+                system("cls");
+            #else
+                system("clear");
+            #endif
+
+            // llamamos a la lista para que imprima todo
+            miLista.Mostrarlistadocompleto();
         }
         else if (opcion == "X") {
              cout << ">> Guardando estado y saliendo del reproductor...\n";

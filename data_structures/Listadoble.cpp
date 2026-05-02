@@ -102,3 +102,23 @@ void ListaDoble::Saltarpistas(int cantidad) {
     
     cout << ">> Se saltaron " << cantidad << " pistas con exito.\n";
 }
+
+void ListaDoble::Mostrarlistadocompleto() {
+    NodoDoble* temp = cabeza;
+    
+    if (temp == nullptr) {
+        cout << ">> La lista de reproduccion esta vacia.\n";
+        return;
+    }
+
+    cout << "==============================================\n";
+    cout << "        LISTADO COMPLETO DE CANCIONES        \n";
+    cout << "==============================================\n";
+    
+    while (temp != nullptr) {
+        cout << "[" << temp->getCancion().id << "] "  << temp->getCancion().nombre << " - " << temp->getCancion().artista << " (" << temp->getCancion().duracion << " seg)\n";
+           
+        temp = temp->getSiguiente();
+    }
+    cout << "========================================================\n";
+}
