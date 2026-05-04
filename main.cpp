@@ -8,16 +8,10 @@ using namespace std;
 
 
 
-void Mostrarmenuprincipal(string estado, string cancion, string artista, string album, int year, string modoaleatorio, int modorepeticion) {
+void Mostrarmenuprincipal(string estado, string cancion, string artista, string album, int year, string modoaleatorio, string repeticion) {
    
-   //texto de repeticion segun el estado
-     string texto_repeticion = "";
-     if (modorepeticion == 1) texto_repeticion = "(R1) ";
-     else if (modorepeticion == 2) texto_repeticion = "(RA) ";
-
-       
     cout << "========================================================\n";
-    cout << estado << " (" << modoaleatorio << "-" << texto_repeticion << "): " << cancion << "\n";
+    cout << estado << " (" << modoaleatorio << "-" << repeticion << "): " << cancion << "\n";
     cout << "Artista: " << artista << "\n";
     cout << "Album: " << album << " (" << year << ")\n";
     cout << "========================================================\n";
@@ -74,7 +68,7 @@ void Cargardatos(ListaDoble& lista) {
 
         //armamos la cancion con los datos y la metemos a la lista 
         Cancion nueva_cancion(id, nombre, artista, album, year, duracion, ubicacion);
-        lista.agregarAlFinal(nueva_cancion);
+        lista.Agregaralfinal(nueva_cancion);
     }
     
     archivo.close(); //cerramos el archivo al terminar
@@ -145,6 +139,10 @@ int main() {
 
    // 0 = Desactivado, 1 = R1 (Repetir Una), 2 = RA (Repetir Todas)
     int modo_repeticion = 0;
+    string texto_repeticion ="";
+
+    bool modo_aleatorio = false;
+    string texto_aleatorio = "Desactivado";
 
    
     //esto es para que cuando el programa inicie no muestre el menu con datos como "ninguna" o "N/A"
@@ -167,8 +165,15 @@ int main() {
            
         #endif
 
+      
+        if (modo_repeticion == 1) texto_repeticion = "(R1) ";
+        else if (modo_repeticion == 2) texto_repeticion = "(RA) ";
+
+        if(modo_aleatorio) texto_aleatorio = "Activado";
+        else texto_aleatorio = "Desactivado";
+
         //mostrar la interfaz
-        Mostrarmenuprincipal(estado_actual, cancion_actual, artista_actual, album_actual, year_actual, aleatorio, modo_repeticion);
+        Mostrarmenuprincipal(estado_actual, cancion_actual, artista_actual, album_actual, year_actual, texto_aleatorio, texto_repeticion);
 
         //leer la opción del usuario
         cin >> opcion;
@@ -202,7 +207,7 @@ int main() {
           }
      } 
         else if (opcion == "Q") { //si la opcion es Q la cancion actual se cambia por la cancion anterior (esto dentro de miLista)
-          miLista.pistaAnterior(modo_repeticion);
+          miLista.pistaAnterior(modo_repeticion,modo_aleatorio);
 
           if (miLista.tieneActual()) { //actualizamos lo que se ve en el menu
                 Cancion* c = miLista.obtenerActual();
@@ -213,7 +218,7 @@ int main() {
             }
           } 
         else if (opcion == "E") {
-          miLista.siguientePista(modo_repeticion); //lo mismo pero con la cancion siguiente
+          miLista.siguientePista(modo_repeticion,modo_aleatorio); //lo mismo pero con la cancion siguiente
 
 
           if (miLista.tieneActual()) { //actualizamos lo que se ve en el menu
@@ -227,7 +232,16 @@ int main() {
              
         
         else if (opcion == "S") {
-             cout << ">> Funcion: Modo Aleatorio\n";
+            modo_aleatorio = !modo_aleatorio; //cambia de true a false o viceversa
+
+            if (modo_aleatorio) {
+                //mezcla las pistas restantes una sola vez al activarse
+                miLista.Mezclarrestantes();
+                cout << ">> Modo aleatorio ACTIVADO. Canciones restantes mezcladas.\n";
+            } else {
+                // Al desactivar, mantiene la lista en su estado actual
+                cout << ">> Modo aleatorio DESACTIVADO.\n";
+            }
           }
         else if (opcion == "R") {
             modo_repeticion++;
@@ -237,10 +251,75 @@ int main() {
              
         }
         else if (opcion == "A") {
-            bool enSubmenuA = true;
-            string opcionA;
+            bool En_submenu_a = true;
+            string Opcion_sub;
 
-            while (enSubmenuA) {
+            while (En_submenu_a) {
+                //limpiamos la consola
+                #ifdef _WIN32
+                    system("cls");
+                #else
+                    system("clear");
+                #endif
+
+               
+                cout << "Actual " << aleatorio << texto_repeticion << ": " << cancion_actual << " - " << artista_actual << "\n";
+                cout << "Lista de reproduccion actual:\n";
+                
+                //imprimimos las pistas restantes o "Vacia"
+                miLista.Mostrarpendientes();
+
+                //menu de opciones
+                cout << "\nOpciones:\n";
+                cout << "S<num> - Saltar a la cancion seleccionada\n";
+                cout << "V - Volver al menu principal\n";
+                cout << "Ingrese Opcion: ";
+                cin >> Opcion_sub;
+
+                char Comando = toupper(Opcion_sub[0]);
+
+                if (Comando == 'V') {
+                    En_submenu_a = false; //salimos al menu principal
+                }
+                else if (Comando == 'S') {
+                    int Saltos = 0;
+                    if (Opcion_sub.length() > 1) {
+                        Saltos = stoi(Opcion_sub.substr(1));
+                    }
+                    
+                    if (Saltos > 0) {
+                        //hacemos el salto en la memoria
+                        miLista.Saltarpistas(Saltos);
+                        
+                        //actualizamos las variables de la interfaz
+                        if (miLista.tieneActual()) {
+                            Cancion* c = miLista.obtenerActual();
+                            cancion_actual = c->nombre;
+                            artista_actual = c->artista;
+                            album_actual = c->album;
+                            year_actual = c->year;
+                        }
+                        
+                        cout << ">> Saltando a la pista...\n";
+                        
+                        //em la pauta dice que al saltar vuelve automaticamente al menu principal
+                        En_submenu_a = false; 
+                    }
+                }
+                
+                //pequeña pausa si no eligio V ni hizo un salto exitoso
+                if (En_submenu_a) {
+                    cout << "\nPresione Enter para continuar...";
+                    cin.ignore(); 
+                    cin.get();
+                }
+            }
+        }
+        else if (opcion == "L") {
+            bool En_submenu_l = true;
+            string Opcion_sub;
+
+            while (En_submenu_l) {
                 //limpiamos la pantalla
                 #ifdef _WIN32
                     system("cls");
@@ -248,89 +327,145 @@ int main() {
                     system("clear");
                 #endif
 
-                //imprimimos el encabezado
-                cout << "========================================================\n";
-                cout << "REPRODUCCION ACTUAL\n";
-                cout << "Sonando ahora: " << cancion_actual << " - " << artista_actual << "\n";
-                cout << "========================================================\n";
+                //imprimimos la cabecera exacta que pide la pauta
+                cout << "Actual " << aleatorio << texto_repeticion << ": " << cancion_actual << " " << artista_actual << "\n";
+                cout << "Canciones registradas:\n";
+                
+                // llamamos al metodo que muestra las canciones
+                miLista.Mostrarlistadocompleto(); 
 
-                //llamamos al nuevo metodo
-                miLista.Mostrarcoladesdeactual();
-
-                //se muestra las opciones del menu
-                cout << "Opciones:\n";
-                cout << "S<num> - Saltar a pista especifica (Ej: S2)\n";
+                // imprimimos las opciones del submenú
+                cout << "\nOpciones:\n";
+                cout << "R<num> - Reproducir cancion seleccionada\n";
+                cout << "A<num> - Agregar cancion seleccionada al final de la lista\n";
+                cout << "N - Agregar cancion al registro\n";
+                cout << "D<num> - Eliminar cancion seleccionada\n";
                 cout << "V - Volver al menu principal\n";
                 cout << "Ingrese Opcion: ";
-                
-                cin >> opcionA;
+                cin >> Opcion_sub;
 
-                if (opcionA.length() > 0) opcionA[0] = toupper(opcionA[0]);
+                //procesamos el comando
+                char Comando = toupper(Opcion_sub[0]); //extraemos la primera letra (R, A, N, D, V)
 
-                //evaluamos que hacer
-                if (opcionA == "V") {
-                    enSubmenuA = false; //rompemos este while y volvemos al principal
+                if (Comando == 'V') {
+                    En_submenu_l = false; //rompemos el ciclo para volver al main
                 } 
-                else if (opcionA[0] == 'S') { 
-                    if (opcionA.length() > 1) {
-                        int cantidad_saltos = 0;
-                        bool es_numero_valido = true;
+                else if (Comando == 'N') {
+                    cin.ignore(); // Limpiamos la basura de la memoria del cin anterior
+                    Cancion Nueva_cancion;
 
-                        //recorremos la palabra desde la posición 1 para saltarnos la 'S'
-                        for (int i = 1; i < opcionA.length(); i++) {
-                            //verificamos que el caracter sea realmente un numero
-                            if (opcionA[i] >= '0' && opcionA[i] <= '9') {
-                                // Restar '0' convierte el texto a numero
-                                int digito = opcionA[i] - '0';
-                                
-                                //multiplicar por 10 es para armar numeros de 2 cifras (ej: si escriben S12)
-                                cantidad_saltos = (cantidad_saltos * 10) + digito;
-                            } else {
-                                es_numero_valido = false; //escribieron una letra por error
-                                break;
-                            }
-                        }
+                    cout << "\n--- REGISTRAR NUEVA CANCION ---\n";
+                    cout << "Nombre de la cancion: ";
+                    getline(cin, Nueva_cancion.nombre);
+                    cout << "Nombre del artista: ";
+                    getline(cin, Nueva_cancion.artista);
+                    cout << "Nombre del album: ";
+                    getline(cin, Nueva_cancion.album);
+                    cout << "Anio de lanzamiento: ";
+                    cin >> Nueva_cancion.year; 
+                    cout << "Duracion en segundos: ";
+                    cin >> Nueva_cancion.duracion;
+                    cin.ignore(); //limpiamos de nuevo antes del ultimo texto
+                    cout << "Ubicacion del archivo: ";
+                    getline(cin, Nueva_cancion.ubicacion); 
 
-                        if (es_numero_valido && cantidad_saltos > 0) {
-                            miLista.Saltarpistas(cantidad_saltos);
-                            
-                            //actualizamos la información de la pantalla
-                            if (miLista.tieneActual()) {
-                                Cancion* c = miLista.obtenerActual();
-                                cancion_actual = c->nombre;
-                                artista_actual = c->artista;
-                                album_actual = c->album;
-                                year_actual = c->year; 
-                            }
-                        } else {
-                            cout << ">>error solo numeros despues de la S.\n";
-                        }
+                    //asignamos un nuevo ID correlativo
+                    Nueva_cancion.id = miLista.Obtenerultimoid() + 1;
+
+                    //la guardamos en la lista doble
+                    miLista.Agregaralfinal(Nueva_cancion);
+
+                    //La guardamos en music_source.txt
+                    // ios::app permite "Añadir" al final del archivo en lugar de sobrescribirlo
+                    ofstream Archivo_musica("music_source.txt", ios::app); 
+                    if (Archivo_musica.is_open()) {
+                        Archivo_musica << Nueva_cancion.id << "," 
+                                       << Nueva_cancion.nombre << "," 
+                                       << Nueva_cancion.artista << "," 
+                                       << Nueva_cancion.album << "," 
+                                       << Nueva_cancion.year << "," 
+                                       << Nueva_cancion.duracion << "," 
+                                       << Nueva_cancion.ubicacion << "\n";
+                        Archivo_musica.close();
+                        cout << ">> Exito: Cancion agregada al registro y guardada en el archivo.\n";
                     } else {
-                        cout << ">> error Faltan numeros despues de la S.\n";
+                        cout << ">> Error: No se pudo abrir music_source.txt.\n";
                     }
-
-                    cout << "Presione Enter para continuar...";
-                    cin.ignore();
-                    cin.get();
                 }
                 else {
-                    cout << ">> Opcion no valida.\n";
-                    cout << "Presione Enter para continuar...";
-                    cin.ignore();
+                    //extraemos el numero que viene pegado a la letra ( si es R5, extraemos el 5)
+                    int Numero_cancion = 0;
+                    if (Opcion_sub.length() > 1) {
+                        // substr(1) toma todo el texto desde la segunda posicion en adelante
+                        Numero_cancion = stoi(Opcion_sub.substr(1)); 
+                    }
+
+                    if (Comando == 'R') {
+                        // Reproducir cancion especifica y mezclar el resto
+                        Cancion* Cancion_encontrada = miLista.Buscarporid(Numero_cancion);
+                        if (Cancion_encontrada != nullptr) {
+                            miLista.Fijarporid(Numero_cancion); // Reutilizamos este metodo
+                            
+                            // Extraemos los datos para la pantalla
+                            cancion_actual = Cancion_encontrada->nombre;
+                            artista_actual = Cancion_encontrada->artista;
+                            estado_actual = "Reproduciendo";
+                            
+                            // La pauta exigia mezclar las pistas restantes
+                            miLista.Mezclarrestantes();
+                            cout << ">> Reproduciendo '" << cancion_actual << "' y mezclando canciones restantes...\n";
+                            
+                            En_submenu_l = false; // Salimos al menu principal despues de elegir
+                        } else {
+                            cout << ">> Error: Cancion ID " << Numero_cancion << " no encontrada.\n";
+                        }
+                    }
+                    else if (Comando == 'A') {
+                        //agregar cancion al final de la lista de reproduccion actual
+                        Cancion* Cancion_encontrada = miLista.Buscarporid(Numero_cancion);
+                        if (Cancion_encontrada != nullptr) {
+                            //reutilizamos el metodo Agregaralfinal, clonando la cancion
+                            miLista.Agregaralfinal(*Cancion_encontrada);
+                            cout << ">> Cancion '" << Cancion_encontrada->nombre << "' agregada a la cola.\n";
+                        } else {
+                            cout << ">> Error: Cancion ID " << Numero_cancion << " no encontrada.\n";
+                        }
+                    }
+                    else if (Comando == 'D') {
+                        //eliminar cancion tanto en memoria como en disco
+                        if (miLista.Eliminarnodo(Numero_cancion)) {
+                            cout << ">> Cancion ID " << Numero_cancion << " eliminada de la memoria.\n";
+                            
+                            //reescribimos todo el archivo music_source.txt
+                            ofstream Archivo_salida("music_source.txt", ios::trunc); // trunc borra el archivo y lo recrea
+                            if (Archivo_salida.is_open()) {
+                                NodoDoble* Temp_recorrido = miLista.cabeza; //accedemos a la cabeza para recorrer
+                                while (Temp_recorrido != nullptr) {
+                                    Archivo_salida << Temp_recorrido->getCancion().id << "," 
+                                                   << Temp_recorrido->getCancion().nombre << "," 
+                                                   << Temp_recorrido->getCancion().artista << "," 
+                                                   << Temp_recorrido->getCancion().album << "," 
+                                                   << Temp_recorrido->getCancion().year << "," 
+                                                   << Temp_recorrido->getCancion().duracion << "," 
+                                                   << Temp_recorrido->getCancion().ubicacion << "\n";
+                                    Temp_recorrido = Temp_recorrido->getSiguiente();
+                                }
+                                Archivo_salida.close();
+                                cout << ">> Archivo music_source.txt actualizado.\n";
+                            }
+                        } else {
+                            cout << ">> Error: No se encontro la cancion ID " << Numero_cancion << " para eliminar.\n";
+                        }
+                    }
+                }
+
+                //pausa antes de limpiar la pantalla de nuevo (excepto si eligio v)
+                if (Comando != 'V') {
+                    cout << "\nPresione Enter para continuar...";
+                    cin.ignore(); 
                     cin.get();
                 }
             }
-        }
-        else if (opcion == "L") {
-             // limpiamos la pantalla para que se vea la lista
-            #ifdef _WIN32
-                system("cls");
-            #else
-                system("clear");
-            #endif
-
-            // llamamos a la lista para que imprima todo
-            miLista.Mostrarlistadocompleto();
         }
         else if (opcion == "X") {
             cout << ">> Guardando estado y saliendo del reproductor...\n";

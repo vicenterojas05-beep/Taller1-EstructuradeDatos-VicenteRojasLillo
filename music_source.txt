@@ -1,5 +1,5 @@
-1,Bohemian Rhapsody,Queen,A Night at the Opera,1975,354,musica/bohemian.mp3
 2,Tren al Sur,Los Prisioneros,Corazones,1990,334,musica/tren_al_sur.mp3
 3,Shape of You,Ed Sheeran,Divide,2017,233,musica/shape_of_you.mp3
 4,Blinding Lights,The Weeknd,After Hours,2020,200,musica/blinding_lights.mp3
-5,Mira Ninita,Los Jaivas,Todos Juntos,1972,412,musica/mira_ninita.mp3
+5,Mira Ninita,Los Jaivas,Todos Juntos,1972,412,musica/mira_ninita.mp36
+3,Shape of You,Ed Sheeran,Divide,2017,233,musica/shape_of_you.mp3

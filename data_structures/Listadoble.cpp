@@ -1,6 +1,6 @@
 #include "Listadoble.h"
 #include <iostream>
-
+#include <cstdlib>
 
 ListaDoble::ListaDoble() {
     cabeza = nullptr;
@@ -11,61 +11,37 @@ ListaDoble::ListaDoble() {
 
 ListaDoble::~ListaDoble() {}
 
-//metodo para agregar una canción al final de la lista
-void ListaDoble::agregarAlFinal(Cancion c) {
-    
-    NodoDoble* nuevoNodo = new NodoDoble(c);
 
-    // la lista esta vacía?
-    if (cabeza == nullptr) {
-        cabeza = nuevoNodo;
-        cola = nuevoNodo;
-        // si es la primera canción, la definimos como la actual 
-        if (actual == nullptr) {
-            actual = nuevoNodo;
-        }
-    } 
-    // si ya hay canciones, la enganchamos al final
-    else {
-        cola->setSiguiente(nuevoNodo); // el ultimo de ahora apunta al nuevo
-        nuevoNodo->setAnterior(cola);  // el nuevo apunta hacia atrás al que era el último
-        cola = nuevoNodo;            // actualizamos la variable cola al nuevo nodo
-    }
-}
-
-void ListaDoble::siguientePista(int repeticion) {
+void ListaDoble::siguientePista(int repeticion, bool aleatorio) {
     if (actual == nullptr) return;
 
-    //si es R1 (1) la cancion se repite continuamente el puntero no avanza.
-    if (repeticion == 1) {
-        return; 
-    }
+    if (repeticion == 1) return; //R1 se queda en la misma
 
     if (actual->getSiguiente() != nullptr) {
-        //avance normal
         actual = actual->getSiguiente();
     } else if (repeticion == 2) {
-        //repeticion de la lista, del final saltamos al principio
+        //volvemos al principio
         actual = cabeza; 
+        
+        //Si el aleatorio esta activo, re-mezclamos al iniciar el ciclo
+        if (aleatorio) {
+            Mezclarrestantes();
+        }
     } else {
         cout << ">> Estas en la ultima cancion. No hay mas pistas.\n";
     }
 }
 
 // Retroceder a la pista anterior
-void ListaDoble::pistaAnterior(int repeticion) {
+void ListaDoble::pistaAnterior(int repeticion,bool aleatorio) {
    if (actual == nullptr) return;
 
-    // Si es R1 (1), el puntero no retrocede.
-    if (repeticion == 1) {
-        return; 
-    }
+    if (actual == nullptr) return;
+    if (repeticion == 1) return; 
 
     if (actual->getAnterior() != nullptr) {
-        // Retroceso normal
         actual = actual->getAnterior();
     } else if (repeticion == 2) {
-        // Magia del RA (2): del principio saltamos al final
         actual = cola; 
     } else {
         cout << ">> Estas en la primera cancion.\n";
@@ -106,24 +82,6 @@ void ListaDoble::Mostrarcoladesdeactual() {
     }
     cout << "----------------------------\n";
 }
-void ListaDoble::Saltarpistas(int cantidad) {
-    if (actual == nullptr) return; // Si no hay nada sonando, no hacemos nada
-
-    int saltados = 0;
-    
-    for (int i = 0; i < cantidad; i++) {
-        // Mientras exista una canción siguiente, avanzamos
-        if (actual->getSiguiente() != nullptr) {
-            actual = actual->getSiguiente();
-            saltados++;
-        } else {
-            cout << ">> Se alcanzo el final de la lista. Solo se saltaron " << saltados << " pistas.\n";
-            return; // Salimos de la función prematuramente
-        }
-    }
-    
-    cout << ">> Se saltaron " << cantidad << " pistas con exito.\n";
-}
 
 void ListaDoble::Mostrarlistadocompleto() {
     NodoDoble* temp = cabeza;
@@ -154,5 +112,144 @@ void ListaDoble::Fijarporid(int Id_buscado) {
             return;
         }
         Temp = Temp->getSiguiente();
+    }
+}
+
+int ListaDoble::Obtenerultimoid() {
+    if (cabeza == nullptr) return 0; // Si no hay canciones, el ultimo ID es 0
+    
+    NodoDoble* Temp = cabeza;
+    while (Temp->getSiguiente() != nullptr) {
+        Temp = Temp->getSiguiente();
+    }
+    return Temp->getCancion().id; // Devolvemos el ID de la ultima pista
+}
+
+void ListaDoble::Agregaralfinal(Cancion Nueva_cancion) {
+    NodoDoble* Nuevo = new NodoDoble(Nueva_cancion);
+    
+
+    if (cabeza == nullptr) {
+        cabeza = Nuevo;
+        cola = Nuevo; // (Mantenemos la cola actualizada por si se usa)
+    } else {
+        NodoDoble* Temp = cabeza;
+        while (Temp->getSiguiente() != nullptr) {
+            Temp = Temp->getSiguiente();
+        }
+        Temp->setSiguiente(Nuevo);
+        Nuevo->setAnterior(Temp);
+        cola = Nuevo;
+    }
+}
+Cancion* ListaDoble::Buscarporid(int id_buscado) {
+    NodoDoble* Temp = cabeza;
+    while (Temp != nullptr) {
+        if (Temp->getCancion().id == id_buscado) {
+            return &(Temp->getCancion()); //retornamos un puntero a los datos de la cancion
+        }
+        Temp = Temp->getSiguiente();
+    }
+    return nullptr; //retorna nulo si el ID no existe
+}
+bool ListaDoble::Eliminarnodo(int id_borrar) {
+    NodoDoble* Temp = cabeza;
+    while (Temp != nullptr) {
+        if (Temp->getCancion().id == id_borrar) {
+            // Si es la cabeza
+            if (Temp == cabeza) {
+                cabeza = Temp->getSiguiente();
+                if (cabeza != nullptr) cabeza->setAnterior(nullptr);
+            } 
+            // Si es la cola
+            else if (Temp == cola) {
+                cola = Temp->getAnterior();
+                if (cola != nullptr) cola->setSiguiente(nullptr);
+            } 
+            // Si esta en medio
+            else {
+                Temp->getAnterior()->setSiguiente(Temp->getSiguiente());
+                Temp->getSiguiente()->setAnterior(Temp->getAnterior());
+            }
+            
+            // Si resulta que la cancion actual era la que acabamos de borrar
+            if (actual == Temp) {
+                actual = nullptr; // Se detiene la reproduccion
+            }
+            
+            delete Temp; // Liberamos memoria
+            return true;
+        }
+        Temp = Temp->getSiguiente();
+    }
+    return false;
+}
+
+void ListaDoble::Mezclarrestantes() {
+    //si no hay cancion actual o no hay canciones siguientes, no hay nada que mezclar
+    if (actual == nullptr || actual->getSiguiente() == nullptr) {
+        return; 
+    }
+
+    //primero contamos manualmente cuantos nodos quedan por mezclar
+    int Cantidad = 0;
+    NodoDoble* Temp = actual->getSiguiente();
+    while (Temp != nullptr) {
+        Cantidad++;
+        Temp = Temp->getSiguiente();
+    }
+
+    //Creamos un arreglo dinamico de punteros de forma manual (sin stl)
+    NodoDoble** Arreglo_nodos = new NodoDoble*[Cantidad];
+
+    //llenamos el arreglo con los punteros a los nodos
+    Temp = actual->getSiguiente();
+    for (int i = 0; i < Cantidad; i++) {
+        Arreglo_nodos[i] = Temp;
+        Temp = Temp->getSiguiente();
+    }
+
+    // intercambiamos solo la info
+    for (int i = Cantidad - 1; i > 0; --i) {
+        int j = rand() % (i + 1); // indice aleatorio
+        
+        // Intercambiamos la struct Cancion entre los dos nodos
+        Cancion Cancion_temporal = Arreglo_nodos[i]->getCancion();
+        Arreglo_nodos[i]->setCancion(Arreglo_nodos[j]->getCancion());
+        Arreglo_nodos[j]->setCancion(Cancion_temporal);
+    }
+
+    // Liberamos la memoria del arreglo  para evitar fugas
+    delete[] Arreglo_nodos;
+}
+
+void ListaDoble::Mostrarpendientes() {
+    // Si no hay cancion actual o es la ultima, mostramos "Vacia" como pide la pauta
+    if (actual == nullptr || actual->getSiguiente() == nullptr) {
+        cout << "Vacia\n";
+        return;
+    }
+
+    NodoDoble* Temp = actual->getSiguiente();
+    int Posicion = 1;
+    
+    while (Temp != nullptr) {
+        cout << Posicion << ". " << Temp->getCancion().nombre << " - " << Temp->getCancion().artista << "\n";
+        Temp = Temp->getSiguiente();
+        Posicion++;
+    }
+}
+
+void ListaDoble::Saltarpistas(int saltos) {
+    if (actual == nullptr) return;
+    
+    //avanzamos el puntero 'actual' la cantidad de saltos solicitados
+    for (int i = 0; i < saltos; i++) {
+        if (actual->getSiguiente() != nullptr) {
+            actual = actual->getSiguiente();
+        } else {
+            // Si nos piden saltar mas alla del final, nos quedamos en la ultima
+            break; 
+        }
     }
 }
