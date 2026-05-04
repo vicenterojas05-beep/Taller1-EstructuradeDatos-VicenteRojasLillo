@@ -15,8 +15,8 @@ El proyecto está diseñado para compilarse utilizando el estándar C++14.
 1. Abre una terminal y navega hasta el directorio raíz del proyecto.
 2. Ejecuta el siguiente comando para compilar:
    ```bash
-   g++ -std=c++14 core/main.cpp data_structures/*.cpp classes/*.cpp -o reproductor
-3. Ejecuta el programa:
+  g++ -std=c++14 main.cpp data_structures/*.cpp -o reproductor
+3. y luego el siguiente para ejecutarlo:
 
 *En Windows:* .\reproductor.exe
 
