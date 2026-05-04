@@ -33,20 +33,42 @@ void ListaDoble::agregarAlFinal(Cancion c) {
     }
 }
 
-void ListaDoble::siguientePista() {
-    if (actual != nullptr && actual->getSiguiente() != nullptr) {
+void ListaDoble::siguientePista(int repeticion) {
+    if (actual == nullptr) return;
+
+    //si es R1 (1) la cancion se repite continuamente el puntero no avanza.
+    if (repeticion == 1) {
+        return; 
+    }
+
+    if (actual->getSiguiente() != nullptr) {
+        //avance normal
         actual = actual->getSiguiente();
-    } 
-    else {
-        // Aquí iría la lógica de "si se acaba, agregar una al azar"
-        //por ahora si no hay más, el puntero se queda en la cancion final
+    } else if (repeticion == 2) {
+        //repeticion de la lista, del final saltamos al principio
+        actual = cabeza; 
+    } else {
+        cout << ">> Estas en la ultima cancion. No hay mas pistas.\n";
     }
 }
 
 // Retroceder a la pista anterior
-void ListaDoble::pistaAnterior() {
-    if (actual != nullptr && actual->getAnterior() != nullptr) {
+void ListaDoble::pistaAnterior(int repeticion) {
+   if (actual == nullptr) return;
+
+    // Si es R1 (1), el puntero no retrocede.
+    if (repeticion == 1) {
+        return; 
+    }
+
+    if (actual->getAnterior() != nullptr) {
+        // Retroceso normal
         actual = actual->getAnterior();
+    } else if (repeticion == 2) {
+        // Magia del RA (2): del principio saltamos al final
+        actual = cola; 
+    } else {
+        cout << ">> Estas en la primera cancion.\n";
     }
 }
 
@@ -121,4 +143,16 @@ void ListaDoble::Mostrarlistadocompleto() {
         temp = temp->getSiguiente();
     }
     cout << "========================================================\n";
+}
+
+void ListaDoble::Fijarporid(int Id_buscado) {
+    NodoDoble* Temp = cabeza;
+    
+    while (Temp != nullptr) {
+        if (Temp->getCancion().id == Id_buscado) {
+            actual = Temp; // encontramos la cancion y la fijamos como actual
+            return;
+        }
+        Temp = Temp->getSiguiente();
+    }
 }

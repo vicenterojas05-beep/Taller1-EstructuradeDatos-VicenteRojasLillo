@@ -16,8 +16,8 @@ public:
 
     //metodos principales
     void agregarAlFinal(Cancion c);
-    void siguientePista();
-    void pistaAnterior();
+    void siguientePista(int repeticion);
+    void pistaAnterior(int repeticion);
 
     
     //Para que el main sepa qué mostrar 
@@ -27,6 +27,7 @@ public:
     void Mostrarcoladesdeactual();
     void Saltarpistas(int cantidad);
     void Mostrarlistadocompleto();
+    void Fijarporid(int Id_buscado);
 };
 
 #endif

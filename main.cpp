@@ -8,9 +8,16 @@ using namespace std;
 
 
 
-void Mostrarmenuprincipal(string estado, string cancion, string artista, string album, int year, string modoaleatorio, string modorepeticion) {
+void Mostrarmenuprincipal(string estado, string cancion, string artista, string album, int year, string modoaleatorio, int modorepeticion) {
+   
+   //texto de repeticion segun el estado
+     string texto_repeticion = "";
+     if (modorepeticion == 1) texto_repeticion = "(R1) ";
+     else if (modorepeticion == 2) texto_repeticion = "(RA) ";
+
+       
     cout << "========================================================\n";
-    cout << estado << " (" << modoaleatorio << "-" << modorepeticion << "): " << cancion << "\n";
+    cout << estado << " (" << modoaleatorio << "-" << texto_repeticion << "): " << cancion << "\n";
     cout << "Artista: " << artista << "\n";
     cout << "Album: " << album << " (" << year << ")\n";
     cout << "========================================================\n";
@@ -19,7 +26,7 @@ void Mostrarmenuprincipal(string estado, string cancion, string artista, string 
     cout << "Q - Pista Anterior\n";
     cout << "E - Pista Siguiente\n";
     cout << "S - Activar/Desactivar modo aleatorio\n";
-    cout << "R - Repeticion (Desactivado/Repetir una/Repetir todas)\n";
+    cout << "R - Repeticion \n";
     cout << "A - Ver lista de reproduccion actual\n";
     cout << "L - Listado de canciones\n";
     cout << "X - Salir\n";
@@ -74,6 +81,41 @@ void Cargardatos(ListaDoble& lista) {
 }
 
 
+void Guardarestado(Cancion* cancionActual) {
+    // ofstream crea  el archivo
+    ofstream archivo("status.cfg"); 
+
+    if (!archivo.is_open()) {
+        cout << ">> Error: No se pudo crear el archivo de guardado status.cfg\n";
+        return;
+    }
+
+    // Si hay una cancion sonando guardamos su ID
+    if (cancionActual != nullptr) {
+        archivo << cancionActual->id << endl;
+    } else {
+        // Si no habia nada sonando guardamos un 0
+        archivo << 0 << endl;
+    }
+
+    archivo.close();
+    cout << ">> Estado guardado correctamente en status.cfg\n";
+}
+void Cargarestado(ListaDoble& lista) {
+    ifstream Archivo("status.cfg");
+    int Id_guardado = 0;
+
+    if (Archivo.is_open()) {
+        Archivo >> Id_guardado;
+        Archivo.close();
+
+        if (Id_guardado > 0) {
+            lista.Fijarporid(Id_guardado);
+            cout << ">> Partida cargada: Retomando desde la cancion ID " << Id_guardado << "\n";
+        }
+    }
+}
+
 
 
 
@@ -90,16 +132,19 @@ int main() {
     string album_actual = "N/A";
     int year_actual = 0;
     string aleatorio = "";
-    string repeticion = "";
+    
 
     string opcion;
     bool ejecutando = true;
 
     ListaDoble miLista;
 
-    Cargardatos(miLista);
+    Cargardatos(miLista); //cargamos las canciones
 
-   
+    Cargarestado(miLista); //cargamos la cancion guardada
+
+   // 0 = Desactivado, 1 = R1 (Repetir Una), 2 = RA (Repetir Todas)
+    int modo_repeticion = 0;
 
    
     //esto es para que cuando el programa inicie no muestre el menu con datos como "ninguna" o "N/A"
@@ -123,7 +168,7 @@ int main() {
         #endif
 
         //mostrar la interfaz
-        Mostrarmenuprincipal(estado_actual, cancion_actual, artista_actual, album_actual, year_actual, aleatorio, repeticion);
+        Mostrarmenuprincipal(estado_actual, cancion_actual, artista_actual, album_actual, year_actual, aleatorio, modo_repeticion);
 
         //leer la opción del usuario
         cin >> opcion;
@@ -157,10 +202,27 @@ int main() {
           }
      } 
         else if (opcion == "Q") { //si la opcion es Q la cancion actual se cambia por la cancion anterior (esto dentro de miLista)
-          miLista.pistaAnterior();
+          miLista.pistaAnterior(modo_repeticion);
+
+          if (miLista.tieneActual()) { //actualizamos lo que se ve en el menu
+                Cancion* c = miLista.obtenerActual();
+                cancion_actual = c->nombre;
+                artista_actual = c->artista;
+                album_actual = c->album;
+                year_actual = c->year;
+            }
           } 
         else if (opcion == "E") {
-          miLista.siguientePista(); //lo mismo pero con la cancion siguiente
+          miLista.siguientePista(modo_repeticion); //lo mismo pero con la cancion siguiente
+
+
+          if (miLista.tieneActual()) { //actualizamos lo que se ve en el menu
+                Cancion* c = miLista.obtenerActual();
+                cancion_actual = c->nombre;
+                artista_actual = c->artista;
+                album_actual = c->album;
+                year_actual = c->year;
+            }
           }
              
         
@@ -168,7 +230,10 @@ int main() {
              cout << ">> Funcion: Modo Aleatorio\n";
           }
         else if (opcion == "R") {
-             cout << ">> Funcion: Repeticion\n";
+            modo_repeticion++;
+            if (modo_repeticion > 2) {
+                modo_repeticion = 0;
+            }
              
         }
         else if (opcion == "A") {
@@ -268,9 +333,18 @@ int main() {
             miLista.Mostrarlistadocompleto();
         }
         else if (opcion == "X") {
-             cout << ">> Guardando estado y saliendo del reproductor...\n";
-             // guardarEstado();
-             ejecutando = false;
+            cout << ">> Guardando estado y saliendo del reproductor...\n";
+            
+            // obtenemos la cancion actual 
+            Cancion* actual = nullptr;
+            if (miLista.tieneActual()) {
+                actual = miLista.obtenerActual();
+            }
+            
+            // llamamos a la funcion 
+            Guardarestado(actual);
+            
+            ejecutando = false;
         } 
         else {
              cout << ">> Opcion no valida. Intente nuevamente.\n";
