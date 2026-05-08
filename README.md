@@ -17,9 +17,9 @@ El proyecto está diseñado para compilarse utilizando el estándar C++14.
   g++ -std=c++14 main.cpp data_structures/*.cpp -o reproductor
 3. y luego el siguiente para ejecutarlo:
 
-*En Windows:* .\reproductor.exe
+* En Windows:* .\reproductor.exe
 
-*En Linux/Mac:* ./reproductor
+* En Linux/Mac:* ./reproductor
 
 **Opción 2: Usando Visual Studio Code**
 
