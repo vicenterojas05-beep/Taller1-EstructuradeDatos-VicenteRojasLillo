@@ -25,7 +25,7 @@ El proyecto está diseñado para compilarse utilizando el estándar C++14.
 
 * Asegúrate de tener configurado el archivo settings.json o tasks.json para que el compilador utilice la bandera -std=c++14.
 
-* Abre el archivo core/main.cpp y presiona el botón de "Run" o "Play".
+* Abre el archivo main.cpp y haz los mismos pasos de ejecucion que en la opcion 1.
 
 ## Funcionalidades Principales
 
