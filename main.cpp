@@ -137,6 +137,10 @@ int main() {
 
     Cargarestado(miLista); //cargamos la cancion guardada
 
+    if (!miLista.tieneActual()) { //Control de error
+        miLista.Fijarporid(1); 
+    }
+
    // 0 = Desactivado, 1 = R1 (Repetir Una), 2 = RA (Repetir Todas)
     int modo_repeticion = 0;
     string texto_repeticion ="";
