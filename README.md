@@ -36,3 +36,57 @@ El proyecto está diseñado para compilarse utilizando el estándar C++14.
 * Gestión de Lista de Reproducción: Ver la lista actual, saltar a una canción específica, o agregar canciones al final de la cola.
 
 * Mantenimiento del Registro: Leer datos desde un archivo base, agregar nuevas canciones al sistema y eliminar registros existentes.
+
+
+```mermaid
+classDiagram
+    class Cancion {
+        +int id
+        +string nombre
+        +string artista
+        +string album
+        +int year
+        +int duracion
+        +string ubicacion
+        +Cancion()
+        +Cancion(int, string, string, string, int, int, string)
+    }
+
+    class NodoDoble {
+        -Cancion cancion
+        -NodoDoble* siguiente
+        -NodoDoble* anterior
+        +NodoDoble(Cancion c)
+        +Cancion getCancion()
+        +NodoDoble* getSiguiente()
+        +NodoDoble* getAnterior()
+        +void setCancion(Cancion song)
+        +void setSiguiente(NodoDoble* nodo)
+        +void setAnterior(NodoDoble* nodo)
+    }
+
+    class ListaDoble {
+        +NodoDoble* cabeza
+        +NodoDoble* cola
+        +NodoDoble* actual
+        +ListaDoble()
+        +~ListaDoble()
+        +void siguientePista(int repeticion, bool aleatorio)
+        +void pistaAnterior(int repeticion, bool aleatorio)
+        +Cancion* obtenerActual()
+        +bool tieneActual()
+        +void Mostrarcoladesdeactual()
+        +void Mostrarlistadocompleto()
+        +void Fijarporid(int Id_buscado)
+        +int Obtenerultimoid()
+        +void Agregaralfinal(Cancion Nueva_cancion)
+        +Cancion* Buscarporid(int id_buscado)
+        +bool Eliminarnodo(int id_borrar)
+        +void Mezclarrestantes()
+        +void Mostrarpendientes()
+        +void Saltarpistas(int saltos)
+    }
+
+    ListaDoble "1" *-- "*" NodoDoble : Gestiona
+    NodoDoble "1" --> "1" Cancion : Contiene
+```
